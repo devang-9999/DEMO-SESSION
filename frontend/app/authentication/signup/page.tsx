@@ -25,14 +25,13 @@ import {
   Box,
   Select,
   MenuItem,
-
 } from "@mui/material";
 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 
-import { signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, provider, gitProvider } from "../../../firebase/firebase";
 
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
@@ -90,8 +89,10 @@ export default function Register() {
           email: data.email,
           password: data.password,
           role: data.role,
-        })
+        }),
       ).unwrap();
+      
+      await createUserWithEmailAndPassword(auth, data.email, data.password);
 
       setSnackbarOpen(true);
 
@@ -102,8 +103,6 @@ export default function Register() {
       if (result.role === "SELLER") {
         setTimeout(() => router.push("/sellerDashboard"), 1000);
       }
-
-
     } catch (err: any) {
       setCustomError(getErrorMessage(err));
       setSnackbarOpen(true);
@@ -117,12 +116,11 @@ export default function Register() {
     try {
       const res = await signInWithPopup(auth, provider);
       const email = res.user.email;
-      const username =
-        res.user.displayName || extractNameFromEmail(email);
-      const role = "CUSTOMER"
+      const username = res.user.displayName || extractNameFromEmail(email);
+      const role = "CUSTOMER";
 
       await dispatch(
-        handleGoogleSignUpThunk({ username, email, role })
+        handleGoogleSignUpThunk({ username, email, role }),
       ).unwrap();
 
       setSnackbarOpen(true);
@@ -141,10 +139,10 @@ export default function Register() {
       const res = await signInWithPopup(auth, gitProvider);
       const email = res.user.email;
       const username = extractNameFromEmail(email);
-      const role = "CUSTOMER"
+      const role = "CUSTOMER";
 
       await dispatch(
-        handleGithubSignUpThunk({ username, email, role })
+        handleGithubSignUpThunk({ username, email, role }),
       ).unwrap();
 
       setSnackbarOpen(true);
@@ -221,9 +219,7 @@ export default function Register() {
                 </InputAdornment>
               }
             />
-            <FormHelperText>
-              {errors.password?.message}
-            </FormHelperText>
+            <FormHelperText>{errors.password?.message}</FormHelperText>
           </FormControl>
 
           <Controller
@@ -233,22 +229,14 @@ export default function Register() {
             render={({ field }) => (
               <FormControl fullWidth margin="normal" error={!!errors.role}>
                 <InputLabel id="role-label">Role</InputLabel>
-                <Select
-                  {...field}
-                  labelId="role-label"
-                  label="Role"
-                >
+                <Select {...field} labelId="role-label" label="Role">
                   <MenuItem value="CUSTOMER">CUSTOMER</MenuItem>
                   <MenuItem value="SELLER">SELLER</MenuItem>
                 </Select>
-                <FormHelperText>
-                  {errors.role?.message}
-                </FormHelperText>
+                <FormHelperText>{errors.role?.message}</FormHelperText>
               </FormControl>
             )}
           />
-
-
 
           <Button
             type="submit"
@@ -289,10 +277,7 @@ export default function Register() {
         onClose={() => setOauthSnackbarOpen(false)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert
-          severity="error"
-          onClose={() => setOauthSnackbarOpen(false)}
-        >
+        <Alert severity="error" onClose={() => setOauthSnackbarOpen(false)}>
           {oauthError}
         </Alert>
       </Snackbar>

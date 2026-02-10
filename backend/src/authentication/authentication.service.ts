@@ -63,10 +63,12 @@ export class AuthenticationService {
         isBanned: false,
       },
     });
-    if (!User) {
-      throw new HttpException({ message: 'Invalid credentials' }, 401);
+    if (User) {
+      return User;
+    } else {
+      const googleUser = this.authenticationRepository.create(loginDto);
+      return await this.authenticationRepository.save(googleUser);
     }
-    return User;
   }
 
   async githubLogin(loginDto: FirebaseLogin) {
@@ -77,10 +79,12 @@ export class AuthenticationService {
         isBanned: false,
       },
     });
-    if (!User) {
-      throw new HttpException({ message: 'Invalid credentials' }, 401);
+    if (User) {
+      return User;
+    } else {
+      const githubUser = this.authenticationRepository.create(loginDto);
+      return await this.authenticationRepository.save(githubUser);
     }
-    return User;
   }
 
   async getById(id: number) {

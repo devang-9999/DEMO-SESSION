@@ -81,7 +81,7 @@ export const handleGoogleSignUpThunk = createAsyncThunk(
   "auth/googleSignUp",
   async (data: handleOAuthPayload, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${API_URL}/authentication/signup`, data)
+      const res = await axios.post(`${API_URL}/authentication/googlelogin`, data)
       return res.data;
     }
     catch (error) {
@@ -97,7 +97,7 @@ export const handleGithubSignUpThunk = createAsyncThunk(
   "auth/githubSignUp",
   async (data: handleOAuthPayload, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${API_URL}/authentication/signup`, data)
+      const res = await axios.post(`${API_URL}/authentication/githublogin`, data)
       return res.data;
     }
     catch (error) {

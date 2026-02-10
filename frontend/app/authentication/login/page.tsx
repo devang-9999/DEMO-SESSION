@@ -37,9 +37,12 @@ import {
   GoogleLogin,
   loginThunk,
   clearError,
+  handleGoogleSignUpThunk,
+  handleGithubSignUpThunk,
 } from "../../../redux/authSlice";
 
 import "./login.css";
+import { extractNameFromEmail } from "@/app/components/nameExtract";
 
 const LoginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -57,8 +60,9 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] =
-    useState<"success" | "error">("success");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success",
+  );
 
   const {
     register,
@@ -83,7 +87,7 @@ export default function Login() {
         loginThunk({
           email: data.email,
           password: data.password,
-        })
+        }),
       ).unwrap();
 
       setSnackbarMessage("Login successful");
@@ -98,9 +102,6 @@ export default function Login() {
       if (result.role === "SELLER") {
         setTimeout(() => router.push("/sellerDashboard"), 1000);
       }
-
-
-
     } catch (err: any) {
       setSnackbarMessage(getErrorMessage(err));
       setSnackbarSeverity("error");
@@ -114,9 +115,12 @@ export default function Login() {
     try {
       const res = await signInWithPopup(auth, provider);
       const email = res.user.email;
-      if (!email) throw new Error("Email not available");
+      const username = res.user.displayName || extractNameFromEmail(email);
+      const role = "CUSTOMER";
 
-      await dispatch(GoogleLogin({ email })).unwrap();
+      await dispatch(
+        handleGoogleSignUpThunk({ username, email, role }),
+      ).unwrap();
 
       setSnackbarMessage("Login successful");
       setSnackbarSeverity("success");
@@ -138,9 +142,13 @@ export default function Login() {
     try {
       const res = await signInWithPopup(auth, gitProvider);
       const email = res.user.email;
-      if (!email) throw new Error("Email not available");
+      const username = res.user.displayName || extractNameFromEmail(email);
+      const role = "CUSTOMER";
 
-      await dispatch(GithubLogin({ email })).unwrap();
+      await dispatch(
+        handleGithubSignUpThunk({ username, email, role }),
+      ).unwrap();
+
 
       setSnackbarMessage("Login successful");
       setSnackbarSeverity("success");
